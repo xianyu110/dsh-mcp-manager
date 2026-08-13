@@ -1,0 +1,47 @@
+{
+  "name": "dsh-mcp-manager",
+  "description": "MCP server manager for DeepSeek Harness: Settings → MCP page with OAuth (PKCE + dynamic client registration) or static-token auth, auto tool registration as mcp__<name>__*",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "deepseek",
+    "mcp",
+    "model-context-protocol",
+    "oauth",
+    "dsh-plugin",
+    "cordis"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyqhyq3/dsh-mcp-manager.git"
+  },
+  "license": "MIT",
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
