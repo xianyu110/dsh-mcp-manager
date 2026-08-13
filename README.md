@@ -2,12 +2,13 @@
 
 [简体中文](README.zh-CN.md) | English
 
-**MCP server manager for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness)** — a Settings → MCP page where you add MCP servers once, authenticate with **OAuth in the browser**, and get every server's tools registered as native `mcp__<name>__*` tools in all your sessions.
+**MCP server manager for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness)** — a Settings → MCP page where you add MCP servers once (remote HTTP or local stdio process), authenticate HTTP servers with **OAuth in the browser**, and get every server's tools registered as native `mcp__<name>__*` tools in all your sessions.
 
-The built-in `@deepseek-ai/dsh-mcp-client` only accepts a static `headers` config — it has no OAuth support. This plugin fills that gap:
+The built-in `@deepseek-ai/dsh-mcp-client` only accepts a static `headers` config — it has no OAuth support and no local stdio transport. This plugin fills that gap:
 
 - **OAuth (authorization code + PKCE)** with RFC 7591 dynamic client registration, `refresh_token` rotation, and auto-reconnect across restarts — one browser login, then it keeps working.
 - **Static Bearer token** mode for servers without OAuth.
+- **stdio local processes**: run `npx` / `uvx` / `python` etc. directly; the plugin speaks JSON-RPC over the child's stdin/stdout (spawns the process, reconnects, and reaps it on exit) — no remote server or auth required.
 - **Tool registration** with the same `mcp__<server>__<rawName>` naming convention as the built-in client, including strict-schema sanitization for the DSH tool registry and `isConcurrencySafe` marking.
 
 ## Requirements
@@ -28,9 +29,11 @@ Then restart `dsh --profile web` and refresh the page. The package declares a `d
 ## Usage
 
 1. Open **Settings → MCP** in the DSH web UI.
-2. **＋ Add MCP server**: name (becomes the `mcp__<name>__*` prefix), URL, and auth mode (OAuth or static token).
+2. **＋ Add MCP server**:
+   - **HTTP**: name (becomes the `mcp__<name>__*` prefix), URL, and auth mode (OAuth or static token).
+   - **stdio**: name, command (e.g. `npx`), args (space-separated; use quotes to protect args containing spaces), and optional env (JSON object) and working directory.
 3. OAuth servers: click **去认证 (Authenticate)** → the browser opens the server's login page → after consent you are redirected back and the tools are registered immediately.
-4. Static-token servers connect as soon as the token is saved.
+4. Static-token servers connect as soon as the token is saved; stdio servers spawn and connect immediately on save.
 
 Status badges: `connected (N tools)` / `needs-auth` / `authorizing` / `error`. Buttons: authenticate, reconnect, delete. State persists at `~/.dsh/mcp-manager.json` (server configs + OAuth client registrations + tokens).
 
@@ -52,7 +55,8 @@ Tool results are rendered as native text content; `isError` results surface thro
 | Settings page | Client half registers a `settings.section` slot entry (MCP tab) |
 | OAuth flow | Host half does dynamic client registration + PKCE; the redirect lands on a route mounted on the DSH GUI webserver itself |
 | Token storage | `~/.dsh/mcp-manager.json`; refreshed automatically on 401 |
-| MCP transport | Streamable HTTP (JSON-RPC over POST, `Mcp-Session-Id`, SSE or JSON responses) |
+| MCP transport (HTTP) | Streamable HTTP (JSON-RPC over POST, `Mcp-Session-Id`, SSE or JSON responses) |
+| MCP transport (stdio) | `child_process.spawn` a local command, JSON-RPC over stdin/stdout (newline-delimited); reconnect reaps the old process first |
 | Tool schema | Server JSON Schemas are sanitized to the registry's supported raw subset (unsupported vocabulary degrades to unconstrained) |
 | Hot path | Same-origin JSON API under `/mcp-manager/api/*` between the settings page and the host half |
 
@@ -60,6 +64,7 @@ Tool results are rendered as native text content; `isError` results surface thro
 
 - `resources` and `prompts` MCP capabilities are not bridged (tools only).
 - Tokens live in a plain JSON file under `~/.dsh` — treat the file as a secret.
+- stdio servers run as long-lived child processes tied to the plugin lifecycle; `args` are whitespace-tokenized (quotes protect args with spaces) with no shell expansion — write absolute paths or env vars yourself for `~`, `$VAR`, pipes, etc.
 - One OAuth client registration per server per GUI origin; moving the GUI to a new origin re-registers automatically on the next login.
 
 ## License

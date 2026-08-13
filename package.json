@@ -1,7 +1,7 @@
 {
   "name": "dsh-mcp-manager",
-  "description": "MCP server manager for DeepSeek Harness: Settings → MCP page with OAuth (PKCE + dynamic client registration) or static-token auth, auto tool registration as mcp__<name>__*",
-  "version": "0.1.0",
+  "description": "MCP server manager for DeepSeek Harness: Settings → MCP page for HTTP (OAuth PKCE + dynamic client registration, or static token) and local stdio servers, with auto tool registration as mcp__<name>__*",
+  "version": "0.2.0",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -24,6 +24,7 @@
     "mcp",
     "model-context-protocol",
     "oauth",
+    "stdio",
     "dsh-plugin",
     "cordis"
   ],
