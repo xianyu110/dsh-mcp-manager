@@ -35,7 +35,7 @@ Then restart `dsh --profile web` and refresh the page. The package declares a `d
 3. OAuth servers: click **去认证 (Authenticate)** → the browser opens the server's login page → after consent you are redirected back and the tools are registered immediately.
 4. Static-token servers connect as soon as the token is saved; stdio servers spawn and connect immediately on save.
 
-Status badges: `connected (N tools)` / `needs-auth` / `authorizing` / `error`. Buttons: authenticate, reconnect, delete. State persists at `~/.dsh/mcp-manager.json` (server configs + OAuth client registrations + tokens).
+Status badges: `connected (N tools)` / `needs-auth` / `authorizing` / `error` / `disabled`. Buttons: authenticate, enable/disable, delete. **Disable** unregisters that server's tools and drops its connection (config and OAuth tokens persist); **Enable** reconnects without re-authenticating. Disabled servers stay dormant across restarts. The toggle is global: it affects every session in this profile. State persists at `~/.dsh/mcp-manager.json` (server configs + OAuth client registrations + tokens).
 
 ### What the agent sees
 
